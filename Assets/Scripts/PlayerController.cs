@@ -21,12 +21,14 @@ public class PlayerController : MonoBehaviour
     private float movementX;
     private float movementY;
     private Timer timerScript;
+    private ControladorAudio controladorAudio;
 
     // Start é chamado antes do primeiro frame update
     void Start()
     {
         count = 0; 
         rb = GetComponent<Rigidbody>(); 
+        controladorAudio = GameObject.FindObjectOfType<ControladorAudio>();
         SetCountText();
         winTextObject.SetActive(false);
         gameOverTextObject.SetActive(false);
@@ -45,10 +47,14 @@ public class PlayerController : MonoBehaviour
     void SetCountText() 
     {
         countText.text = "Count: " + count.ToString();
+        if (count >= 1){
+            controladorAudio.TocarSomMoeda();
+        }
         if (count >= 12)
         {
             winTextObject.SetActive(true);
             timerScript.ChangeColor();  // Muda a cor quando ganha
+            controladorAudio.TocarSomVitoria();
             StopGame();  // Para o jogo quando ganha
         }
     }
@@ -65,6 +71,7 @@ public class PlayerController : MonoBehaviour
 
     void GameOver()
     {
+        controladorAudio.TocarSomDerrota();
         gameOverTextObject.SetActive(true);
         rb.velocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
@@ -95,6 +102,14 @@ public class PlayerController : MonoBehaviour
             other.gameObject.SetActive(false);  
             count = count + 1;
             SetCountText();
+        }
+    }
+
+    private void OnCollisionEnter (Collision collision)
+    {
+        if(collision.gameObject.CompareTag("Enemy"))
+        {
+            GameOver();
         }
     }
 }
